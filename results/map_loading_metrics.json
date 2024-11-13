@@ -1,0 +1,62 @@
+{
+    "1/10": {
+        "time_taken_seconds": 5.533092737197876,
+        "memory_used_kb": 76952.708984375,
+        "peak_memory_used_kb": 216517.5791015625,
+        "data_points_count": 335671
+    },
+    "2/10": {
+        "time_taken_seconds": 11.5560941696167,
+        "memory_used_kb": 144969.2080078125,
+        "peak_memory_used_kb": 401804.8359375,
+        "data_points_count": 671343
+    },
+    "3/10": {
+        "time_taken_seconds": 17.009167432785034,
+        "memory_used_kb": 212709.2890625,
+        "peak_memory_used_kb": 586778.1650390625,
+        "data_points_count": 1007014
+    },
+    "4/10": {
+        "time_taken_seconds": 22.031229972839355,
+        "memory_used_kb": 280586.001953125,
+        "peak_memory_used_kb": 771898.0263671875,
+        "data_points_count": 1342686
+    },
+    "5/10": {
+        "time_taken_seconds": 29.195146560668945,
+        "memory_used_kb": 348457.056640625,
+        "peak_memory_used_kb": 957013.5146484375,
+        "data_points_count": 1678357
+    },
+    "6/10": {
+        "time_taken_seconds": 34.345330238342285,
+        "memory_used_kb": 416328.8447265625,
+        "peak_memory_used_kb": 1142100.291015625,
+        "data_points_count": 2014028
+    },
+    "7/10": {
+        "time_taken_seconds": 38.35699725151062,
+        "memory_used_kb": 484200.759765625,
+        "peak_memory_used_kb": 1327239.1220703125,
+        "data_points_count": 2349700
+    },
+    "8/10": {
+        "time_taken_seconds": 45.94613862037659,
+        "memory_used_kb": 552088.0546875,
+        "peak_memory_used_kb": 1512361.4345703125,
+        "data_points_count": 2685371
+    },
+    "9/10": {
+        "time_taken_seconds": 50.66508722305298,
+        "memory_used_kb": 501922.5966796875,
+        "peak_memory_used_kb": 1579439.05078125,
+        "data_points_count": 3021043
+    },
+    "10/10": {
+        "time_taken_seconds": 55.345903396606445,
+        "memory_used_kb": 687839.12109375,
+        "peak_memory_used_kb": 1882592.1728515625,
+        "data_points_count": 3356714
+    }
+}

@@ -1,0 +1,20 @@
+{
+    "matplotlib": {
+        "time_taken_seconds": 0.07105064392089844,
+        "memory_used_kb": 423.81640625,
+        "peak_memory_used_kb": 434.3857421875,
+        "data_points_count": 10
+    },
+    "plotly": {
+        "time_taken_seconds": 0.1931915283203125,
+        "memory_used_kb": 348.869140625,
+        "peak_memory_used_kb": 31581.560546875,
+        "data_points_count": 10
+    },
+    "seaborn": {
+        "time_taken_seconds": 0.23000407218933105,
+        "memory_used_kb": 929.5634765625,
+        "peak_memory_used_kb": 933.45703125,
+        "data_points_count": 10
+    }
+}

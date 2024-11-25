@@ -15,11 +15,12 @@ with open('./data/swedish_regions.geojson', 'r') as f:
 # Load and cache the dataset
 @lru_cache(maxsize=32)
 def load_data():
-    data = pd.read_csv('./data/ebd_SE_relSep-2024/ebd_SE_relSep-2024.txt', sep='\t', low_memory=False)
+    data = pd.read_csv('./data/ebd_SE_relSep-2024/ebd_SE_relSep-2024.txt', sep='\t', low_memory=False)[:30000]
     data['OBSERVATION DATE'] = pd.to_datetime(data['OBSERVATION DATE'])
-    # Extract the first word of the "STATE" column for simplified state matching
+    # Drop rows with missing essential columns
+    data = data.dropna(subset=['STATE', 'LATITUDE', 'LONGITUDE', 'COMMON NAME'])
+    # Clean up the 'STATE' column
     data['STATE'] = data['STATE'].apply(lambda x: x.split()[0] if pd.notnull(x) else x)
-    # Take away the last character in the STATE column if its "s"
     data['STATE'] = data['STATE'].apply(lambda x: x[:-1] if x.endswith('s') else x)
     return data
 
@@ -30,7 +31,7 @@ species_list = sorted(data['COMMON NAME'].unique())
 app = dash.Dash(__name__)
 server = app.server
 
-# Custom HTML and Fonts
+# Custom HTML and Fonts (same as before)
 app.index_string = '''
 <!DOCTYPE html>
 <html>
@@ -61,6 +62,7 @@ app.layout = html.Div([
             id='species-dropdown',
             options=[{'label': sp, 'value': sp} for sp in species_list],
             placeholder="Select a species",
+            value=None,  # Ensure no species is selected initially
             style={'width': '100%', 'fontFamily': 'Hanken Grotesk', 'color': 'gray'}
         ),
         html.H2(id='species-name', style={'fontFamily': 'Crimson Pro', 'marginTop': '20px', 'color': 'white'}),
@@ -70,11 +72,31 @@ app.layout = html.Div([
         }),
         html.Div(id='species-info', style={'color': 'white', 'marginTop': '20px', 'fontFamily': 'Hanken Grotesk'}),
         html.Div(id='state-observations-map', children=[
-            dcc.Graph(id='observations-map')
-        ], style={'marginTop': '20px'}),
+            html.Iframe(
+                id='folium-map',
+                style={
+                    'width': '100%',
+                    'height': '60vh',  # Increase height to 60% of the viewport height
+                    'border': 'none'
+                }
+            )
+        ], style={
+            'flexGrow': '1',  # Make the map container expand to fill available space
+            'height': 'auto',
+            'display': 'flex',
+            'flexDirection': 'column'
+        }),
     ], style={
-        'width': '25%', 'position': 'fixed', 'backgroundColor': '#2c2f33', 'height': '100vh', 'color': 'white', 
-        'padding': '20px', 'boxSizing': 'border-box', 'overflow': 'auto'
+        'width': '25%', 
+        'position': 'fixed', 
+        'backgroundColor': '#2c2f33', 
+        'height': '100vh',  # Ensure the sidebar takes up full viewport height
+        'color': 'white', 
+        'padding': '20px', 
+        'boxSizing': 'border-box', 
+        'display': 'flex',
+        'flexDirection': 'column',  # Stack sidebar elements vertically
+        'overflow': 'auto'  # Allow scrolling if necessary
     }),
 
     # Right-side layout
@@ -83,72 +105,88 @@ app.layout = html.Div([
     ], style={'width': '75%', 'marginLeft': '25%', 'fontFamily': 'Roboto'})
 ])
 
-# Callback to update species info and sidebar map
+
+
+
+import folium
+from dash.exceptions import PreventUpdate
+
 @app.callback(
-    [Output('species-name', 'children'),
-     Output('scientific-name', 'children'),
-     Output('species-image', 'src'),
-     Output('species-image', 'style'),
-     Output('species-info', 'children'),
-     Output('observations-map', 'figure')],
+    [
+        Output('species-name', 'children'),
+        Output('scientific-name', 'children'),
+        Output('species-image', 'src'),
+        Output('species-image', 'style'),
+        Output('species-info', 'children'),
+        Output('folium-map', 'srcDoc')
+    ],
     [Input('species-dropdown', 'value')]
 )
 def update_species_info(species):
     if species:
         species_name = species
-        scientific_name = data[data['COMMON NAME'] == species]['SCIENTIFIC NAME'].iloc[0]
+        species_data = data[data['COMMON NAME'] == species]
+        scientific_name = species_data['SCIENTIFIC NAME'].iloc[0]
         query = species.replace(' ', '_')
         url = f'https://en.wikipedia.org/w/api.php?action=query&prop=pageimages|pageprops&format=json&piprop=thumbnail&titles={query}&pithumbsize=300&redirects=1'
         response = requests.get(url)
-        image_url = next((page['thumbnail']['source'] for page in response.json()['query']['pages'].values() if 'thumbnail' in page), None)
-        if not image_url:
-            image_url = 'https://via.placeholder.com/100?text=No+Image+Available'
-        
+        image_url = next(
+            (page.get('thumbnail', {}).get('source') for page in response.json()['query']['pages'].values() if 'thumbnail' in page),
+            'https://via.placeholder.com/100?text=No+Image+Available'
+        )
+
         # Extract additional species information
-        species_data = data[data['COMMON NAME'] == species].iloc[0]
-        species_info = [
-            html.P(f"Taxonomic Order: {species_data['TAXONOMIC ORDER']}"),
-            html.P(f"Observation Count: {species_data['OBSERVATION COUNT']}"),
-            html.P(f"Breeding Category: {species_data['BREEDING CATEGORY']}"),
-            html.P(f"State: {species_data['STATE']}"),
-            html.P(f"Locality: {species_data['LOCALITY']}")
-        ]
-        
+        species_info = []
+        species_data_sample = species_data.iloc[0]
+        species_info.append(html.P(f"Taxonomic Order: {species_data_sample['TAXONOMIC ORDER']}"))
+        species_info.append(html.P(f"Observation Count: {species_data_sample['OBSERVATION COUNT']}"))
+        species_info.append(html.P(f"Breeding Category: {species_data_sample['BREEDING CATEGORY']}"))
+        species_info.append(html.P(f"State: {species_data_sample['STATE']}"))
+        species_info.append(html.P(f"Locality: {species_data_sample['LOCALITY']}"))
+
         # Filter data for observations by state for the selected species
-        state_counts = data[data['COMMON NAME'] == species]['STATE'].value_counts().reset_index()
+        state_counts = species_data['STATE'].value_counts().reset_index()
         state_counts.columns = ['STATE', 'observations']
     else:
         species_name = "All Species"
         scientific_name = ""
         image_url = ""
-        species_info = ""
-        
+        species_info = []
+
         # Count all observations by state for all species
         state_counts = data['STATE'].value_counts().reset_index()
         state_counts.columns = ['STATE', 'observations']
 
-    # Create a choropleth map for observations by state
-    if state_counts.empty:
-        fig = go.Figure()
-        fig.update_layout(
-            title="No specific observations found",
-            xaxis={"visible": False},
-            yaxis={"visible": False}
-        )
-    else:
-        fig = px.choropleth(
-            state_counts,
-            geojson=sweden_geojson,
-            locations='STATE',
-            color='observations',
-            featureidkey="properties.name",
-            color_continuous_scale="reds",
-            title="Observations by State"
-        )
-        fig.update_geos(fitbounds="locations", visible=False)
-        fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
+    # Generate Folium map
+    m = folium.Map(location=[63.0, 16.0], zoom_start=5)
+    folium.Choropleth(
+        geo_data=sweden_geojson,
+        name="choropleth",
+        data=state_counts,
+        columns=['STATE', 'observations'],
+        key_on="feature.properties.name",  # Ensure this matches your GeoJSON properties
+        fill_color="YlOrRd",
+        fill_opacity=0.7,
+        line_opacity=0.2,
+        legend_name="Observations"
+    ).add_to(m)
 
-    return species_name, scientific_name, image_url, {'display': 'block' if species else 'none'}, species_info, fig
+    # Save the map to an HTML string and inject custom CSS for full height and width
+    map_html = m.get_root().render()
+    map_html = map_html.replace(
+        "<head>",
+        "<head><style>html, body {width: 100%; height: 100%; margin: 0; padding: 0;}</style>"
+    )
+
+    return (
+        species_name,
+        scientific_name,
+        image_url,
+        {'display': 'block' if species else 'none'},
+        species_info,
+        map_html
+    )
+
 
 # Callback to update main map with all or filtered data
 @app.callback(
@@ -161,9 +199,16 @@ def update_map(species):
     else:
         filtered_data = data
 
-    if filtered_data.empty or 'LATITUDE' not in filtered_data.columns or 'LONGITUDE' not in filtered_data.columns:
+    # Drop rows with missing 'LATITUDE' or 'LONGITUDE'
+    filtered_data = filtered_data.dropna(subset=['LATITUDE', 'LONGITUDE'])
+
+    if filtered_data.empty:
         fig = go.Figure()
-        fig.update_layout(mapbox_style="carto-darkmatter", showlegend=False, margin={"r": 0, "t": 0, "l": 0, "b": 0})
+        fig.update_layout(
+            mapbox_style="carto-darkmatter",
+            showlegend=False,
+            margin={"r": 0, "t": 0, "l": 0, "b": 0}
+        )
         return fig
 
     fig = px.scatter_mapbox(
@@ -176,7 +221,11 @@ def update_map(species):
         height=800,
         color_discrete_sequence=['red']
     )
-    fig.update_layout(mapbox_style="carto-darkmatter", showlegend=False, margin={"r": 0, "t": 0, "l": 0, "b": 0})
+    fig.update_layout(
+        mapbox_style="carto-darkmatter",
+        showlegend=False,
+        margin={"r": 0, "t": 0, "l": 0, "b": 0}
+    )
     return fig
 
 # Callback to set species from map click

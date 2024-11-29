@@ -15,7 +15,7 @@ with open('./data/swedish_regions.geojson', 'r') as f:
 # Load and cache the dataset
 @lru_cache(maxsize=32)
 def load_data():
-    data = pd.read_csv('./data/ebd_SE_relSep-2024/ebd_SE_relSep-2024.txt', sep='\t', low_memory=False)[:30000]
+    data = pd.read_csv('./data/ebd_SE_relSep-2024/ebd_SE_relSep-2024.txt', sep='\t', low_memory=False)[:20000]
     data['OBSERVATION DATE'] = pd.to_datetime(data['OBSERVATION DATE'])
     # Drop rows with missing essential columns
     data = data.dropna(subset=['STATE', 'LATITUDE', 'LONGITUDE', 'COMMON NAME'])
@@ -224,7 +224,8 @@ def update_map(species):
     fig.update_layout(
         mapbox_style="carto-darkmatter",
         showlegend=False,
-        margin={"r": 0, "t": 0, "l": 0, "b": 0}
+        margin={"r": 0, "t": 0, "l": 0, "b": 0},
+        hovermode='closest'
     )
     return fig
 

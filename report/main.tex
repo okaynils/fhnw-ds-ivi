@@ -26,11 +26,14 @@
     colorlinks=true,
     linkcolor=black,
     filecolor=magenta,
-    urlcolor=cyan
-    }
+    urlcolor=cyan,
+    breaklinks=true,  % Ensure URLs can break across lines
+    pdfpagelayout=OneColumn
+}
 \usepackage{titlesec}
 \usepackage{float}
 \usepackage{subfig}
+\usepackage[hyphenbreaks]{breakurl}  % Better URL breaking
 
 \usepackage[style=ieee]{biblatex}
 \addbibresource{references.bib}
@@ -72,6 +75,7 @@
 \include{chapters/hci_basics}
 \include{chapters/evaluation}
 
+\sloppy  % Allow line-breaking flexibility in bibliography
 \printbibliography
 
 \end{document}

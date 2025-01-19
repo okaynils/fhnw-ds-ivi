@@ -36,7 +36,7 @@ To facilitate more focused exploration, the dashboard incorporates interactive f
 
 \begin{figure}[h] 
     \centering 
-    \includegraphics[width=0.8\textwidth]{figures/species_dropdown.jpg} 
+    \includegraphics[width=0.4\textwidth]{figures/species_dropdown.jpg} 
     \caption{Species selection dropdown for filtering observations.} 
     \label{fig:dropdown} 
 \end{figure}
@@ -48,6 +48,33 @@ This filtering capability shows the "Zoom and Filter" principle which should all
     \includegraphics[width=0.8\textwidth]{figures/species_details.jpg} 
     \caption{Map displaying observations of a selected species after filtering.} 
     \label{fig:filtered_map} 
+\end{figure}
+
+Another filtering dimension was added to first and foremost lower computational requirements by bundling together observations that are close to each other into clusters which get labeled with the number of observations they represent. Wheen zooming further into such a cluster, we can see that the cluster starts to expaned into smaller clusters or individual bird observations (depending on neighbors):
+
+\begin{figure}[h] 
+    \centering 
+    \includegraphics[width=0.8\textwidth]{figures/zoom_2.jpg} 
+    \caption{Zoomed in map displaying smaller clusters and region.} 
+    \label{fig:zoomed_map2} 
+\end{figure}
+
+The Figure \ref{fig:zoomed_map2} above now also shows some individual bird observations coming up as red dots we could now hover over these to get more information on the observation (see Figure \ref{fig:cursor_bubbles}). When hovering over a remaining cluster however, a blue region appears which indicates the area further points may lie in. If we click on that cluster we automatically zoom in even further:
+
+\begin{figure}[h] 
+    \centering 
+    \includegraphics[width=0.8\textwidth]{figures/zoom_3.jpg} 
+    \caption{Zoomed in map at Katrineholm.} 
+    \label{fig:zoomed_map3} 
+\end{figure}
+
+If we now decide to even dig deeper into such a cluster, we can find locations of bird observations that were recorded at the same location. These then get nicely spiraled up, allowing to look at each individual observation in detail:
+
+\begin{figure}[H] 
+    \centering 
+    \includegraphics[width=0.4\textwidth]{figures/zoom_spiral.jpg} 
+    \caption{Observation Spiral at Katrineholm.} 
+    \label{fig:zoomed_spiral} 
 \end{figure}
 
 \subsection{Details on Demand}
@@ -64,10 +91,10 @@ This implementation of "Details on Demand" ensures that users can access specifi
 
 \subsection{Technical Implementation}
 
-The dashboard leverages the Dash framework for Python \cite{DashDocumentationUser}, enabling the creation of interactive web applications. Key implementation aspects include:
+The dashboard leverages the Dash framework for Python \cite{DashDocumentationUser} that enables the creation of interactive web applications. Key implementation aspects include:
 
 \begin{itemize} 
-    \item \textbf{Data Loading}: The full dataset is loaded without slicing to ensure all observations and species are available. 
+    \item \textbf{Data Loading}: The full dataset is loaded to ensure all observations and species are available. A clustering mechanism is applied by Leaflet to manage the rendering of large datasets in a more performant way.
     \item \textbf{Data Cleaning}: Missing values in critical columns such as \texttt{LATITUDE}, \texttt{LONGITUDE}, and \texttt{COMMON NAME} are handled to prevent empty maps or dropdowns. 
     \item \textbf{Callbacks}: Dash callbacks are used to update the map and sidebar components dynamically based on user interactions. 
     \item \textbf{Geographical Consistency}: The state observations map uses the \texttt{fitbounds="geojson"} parameter to always display the entire country's outline, regardless of the data filtered. 

@@ -25,21 +25,11 @@ Weber's Law states that the just-noticeable difference between two stimuli is pr
 Fitts's Law predicts that the time required to move to a target area is a function of the distance to the target and the size of the target \cite{mccrocklinInteractionDesignData2015}. Smaller targets that are farther away are harder and slower to click.
 
 \paragraph{Application to the Dashboard}
-Here are a few measures I took to improve the dashboard based on the afforementioned principles.
-
-\begin{itemize}
-    \item \textbf{Hoverability of Data Points}: Initially, small scatter points on the map made it difficult for users to hover over and click them, violating Fitts's Law. 
-    \item \textbf{Improvement Implemented}: By adding \texttt{hovermode='closest'} to the scatter mapbox, the interactive area around each data point (cursor bubble) was increased. 
-    \item \textbf{Benefits}: 
-    \begin{itemize} 
-        \item \textbf{Easier Interaction}: Users do not need to precisely hover over tiny points, reducing the effort and time required. 
-        \item \textbf{Enhanced Accessibility}: Larger interactive areas assist users with motor impairments or those using touch devices. 
-    \end{itemize} 
-\end{itemize}
+I addressed the issue of small scatter points on the map that made hovering and clicking difficult, \textbf{violating Fitts's Law}. By implementing the \texttt{hovermode='closest'} setting in the scatter mapbox, the interactive area around each data point was expanded, creating larger cursor bubbles. This adjustment made interactions easier and reduce the effort required to precisely target small points. Additionally, it enhanced accessibility by accommodating users with motor impairments or those using touch devices, ensuring a smoother and more inclusive experience.
 
 \begin{figure}[H] 
     \centering 
-    \includegraphics[width=0.6\textwidth]{figures/cursor_bubbles.jpg} 
+    \includegraphics[width=0.6\textwidth]{figures/cursor_bubbles_v2.jpg} 
     \caption{Tooltip displayed if cursor is near a data point.} 
     \label{fig:cursor_bubbles} 
 \end{figure}
@@ -113,18 +103,7 @@ The dashboard's behavior defines user interactions:
 
 A cognitive walkthrough was performed using Rick Spencer's \textit{Streamlined Cognitive Walkthrough Method} \cite{spencerStreamlinedCognitiveWalkthrough2000} to evaluate the dashboard's usability. The walkthrough focuses on typical tasks that users might perform. It aims to assess whether the interface supports these tasks effectively.
 
-\subsection{Users and Tasks}
-
-\paragraph{User Profile}
-
-The primary users are:
-
-\begin{itemize} 
-    \item \textbf{Bird Enthusiasts}: Individuals interested in birdwatching and bird data exploration. 
-    \item 
-    \textbf{Ornithologists and Researchers}: Professionals studying bird patterns and behaviors. 
-    \item \textbf{Conservationists}: Individuals involved in wildlife conservation efforts. 
-\end{itemize}
+\subsection{Tasks}
 
 \paragraph{Selected Tasks}
 
